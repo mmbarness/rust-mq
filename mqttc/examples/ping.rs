@@ -7,11 +7,11 @@ use std::env;
 use std::process::exit;
 use std::time::Duration;
 use netopt::NetworkOptions;
-use mqttc::{Client, ClientOptions, ReconnectMethod};
+use mqttc::{ ClientOptions, ReconnectMethod};
 
 fn main() {
     env_logger::init();
-    let mut args: Vec<_> = env::args().collect();
+    let args: Vec<_> = env::args().collect();
     if args.len() < 2 {
         println!("Usage: cargo run --example ping -- 127.0.0.1:1883");
         exit(0);

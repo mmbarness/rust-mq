@@ -48,7 +48,7 @@ impl Default for SubscribeCommand {
         SubscribeCommand {
             topics: vec![SubscribeTopic { topic_path: "#".to_string(), qos: QoS::ExactlyOnce }],
             address: "localhost".to_string(),
-            port: 1883,
+            port: 1414,
             clean_session: true,
             last_will: None,
             log_file: None,
@@ -154,15 +154,12 @@ impl Command for SubscribeCommand {
                 },
                 Err(e) => {
                     match e {
-                        Error::UnhandledPuback(_) => { print_error("unhandled puback") },
-                        Error::UnhandledPubrec(_) => { print_error("unhandled pubrec") },
-                        Error::UnhandledPubrel(_) => { print_error("unhandled pubrel") },
-                        Error::UnhandledPubcomp(_) => { print_error("unhandled pubcomp") },
-                        Error::Mqtt(ref err) => match *err {
-                            mqtt3::Error::TopicNameMustNotContainNonUtf8 => {
+                        Error::PacketIdentifierError(e) => { print_error(e.to_string()) },
+                        Error::Mqtt(ref err) => match err {
+                            mqtt3::MQError::TopicNameMustNotContainNonUtf8(_) => {
                                 print_error("topic name contains non-UTF-8 characters")
                             },
-                            mqtt3::Error::TopicNameMustNotContainWildcard => {
+                            mqtt3::MQError::TopicNameMustNotContainWildcard => {
                                 print_error("topic name contains wildcard")
                             },
                             _ => {
@@ -226,7 +223,7 @@ fn print_topics(topics: &[SubscribeTopic]) {
     writeln!(t, "").unwrap();
 }
 
-fn print_message<T: AsRef<str>, M: AsRef<str>>(title: T, message: M, color: u16) {
+fn print_message<T: AsRef<str>, M: AsRef<str>>(title: T, message: M, color: u32) {
     let mut t = term::stdout().unwrap();
     t.fg(color).unwrap();
     write!(t, "{:>14} ", title.as_ref()).unwrap();

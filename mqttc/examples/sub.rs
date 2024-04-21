@@ -1,17 +1,16 @@
 extern crate mqttc;
 extern crate netopt;
-#[macro_use] extern crate log;
 extern crate env_logger;
 
 use std::env;
 use std::process::exit;
 use std::time::Duration;
 use netopt::NetworkOptions;
-use mqttc::{PubSub, Client, ClientOptions, ReconnectMethod, PubOpt};
+use mqttc::{PubSub, ClientOptions, ReconnectMethod};
 
 fn main() {
     env_logger::init();
-    let mut args: Vec<_> = env::args().collect();
+    let args: Vec<_> = env::args().collect();
     if args.len() < 3 {
         println!("Usage: RUST_LOG=main,mqttc cargo run --example sub -- 127.0.0.1:1883 /a/b/c");
         exit(0);

@@ -3,6 +3,7 @@ extern crate rand;
 extern crate byteorder;
 extern crate mqtt3;
 extern crate netopt;
+extern crate thiserror;
 
 mod error;
 mod sub;
@@ -10,9 +11,7 @@ mod client;
 mod conn;
 pub mod store;
 
-pub use conn::{
-    Connection
-};
+pub use conn::Connection;
 
 pub use error::{
     Error,

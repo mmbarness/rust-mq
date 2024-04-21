@@ -8,3 +8,4 @@ license = "MIT"
 
 [dependencies]
 byteorder = "0.4"
+thiserror = "1.0.59"

@@ -27,7 +27,7 @@ impl CLI {
         }
     }
 
-    pub fn parse(&self) -> Box<Command> {
+    pub fn parse(&self) -> Box<dyn Command> {
         match self.command.as_str() {
             "subscribe" | "sub" => Box::new(self.subscribe_parse()),
             "publish" | "pub" => Box::new(self.publish_parse()),
