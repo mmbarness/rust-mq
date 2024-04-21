@@ -28,7 +28,7 @@ name = "rustmq"
 path = "src/lib.rs"
 
 [dependencies]
-term = "0.4"
+term = "0.7"
 getopts = "0.2"
 openssl = { version = "0.10.3" }
 log = "0.3"

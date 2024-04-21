@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::vec::Vec;
-use {Publish, TopicPath, PacketIdentifier, QoS, LastWill, Error, Result};
+use {Publish, TopicPath, PacketIdentifier, QoS, LastWill, MQError, Result};
 
 #[derive(Debug, Clone)]
 pub struct Message {
@@ -16,7 +16,7 @@ impl Message {
     pub fn from_pub(publish: Box<Publish>) -> Result<Box<Message>> {
         let topic = TopicPath::from(publish.topic_name.as_str());
         if topic.wildcards {
-            return Err(Error::TopicNameMustNotContainWildcard);
+            return Err(MQError::TopicNameMustNotContainWildcard);
         }
         Ok(Box::new(Message {
             topic: topic,

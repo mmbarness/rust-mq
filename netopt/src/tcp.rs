@@ -151,7 +151,7 @@ mod test {
     use std::net::Shutdown;
     use std::io::{Read, Write};
     use std::thread;
-    use super::{NetworkOptions, NetworkStream};
+    use super::NetworkOptions;
     use mock::MockStream;
 
     #[test]

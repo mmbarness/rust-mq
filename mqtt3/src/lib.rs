@@ -1,20 +1,21 @@
 extern crate byteorder;
+extern crate thiserror;
 
-mod error;
+mod mq_error;
 mod mqtt;
 mod read;
 mod write;
 mod topic;
 mod msg;
 
-pub use error::{
-    Error,
+use thiserror::Error;
+
+pub use mq_error::{
+    MQError,
     Result
 };
 
-pub use msg::{
-    Message
-};
+pub use msg::Message;
 
 pub use mqtt::{
     Packet,
@@ -53,13 +54,13 @@ impl Protocol {
         match name {
             "MQIsdp" => match level {
                 3 => Ok(Protocol::MQIsdp(3)),
-                _ => Err(Error::UnsupportedProtocolVersion)
+                _ => Err(MQError::UnsupportedProtocolVersion)
             },
             "MQTT" => match level {
                 4 => Ok(Protocol::MQTT(4)),
-                _ => Err(Error::UnsupportedProtocolVersion)
+                _ => Err(MQError::UnsupportedProtocolVersion)
             },
-            _ => Err(Error::UnsupportedProtocolName)
+            _ => Err(MQError::UnsupportedProtocolName)
         }
     }
 
@@ -91,7 +92,7 @@ impl QoS {
             0 => Ok(QoS::AtMostOnce),
             1 => Ok(QoS::AtLeastOnce),
             2 => Ok(QoS::ExactlyOnce),
-            _ => Err(Error::UnsupportedQualityOfService)
+            _ => Err(MQError::UnsupportedQualityOfService)
         }
     }
 
@@ -177,7 +178,7 @@ impl PacketType {
             12 => Ok(PacketType::Pingreq),
             13 => Ok(PacketType::Pingresp),
             14 => Ok(PacketType::Disconnect),
-            _ => Err(Error::UnsupportedPacketType)
+            _ => Err(MQError::UnsupportedPacketType)
         }
     }
 
@@ -196,7 +197,7 @@ impl fmt::Display for PacketType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum ConnectReturnCode {
     Accepted,
     RefusedProtocolVersion,
@@ -204,6 +205,22 @@ pub enum ConnectReturnCode {
     ServerUnavailable,
     BadUsernamePassword,
     NotAuthorized
+}
+
+impl fmt::Display for ConnectReturnCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let str = match self {
+            ConnectReturnCode::Accepted => "Accepted",
+            ConnectReturnCode::RefusedProtocolVersion => "RefusedProtocolVersion",
+            ConnectReturnCode::RefusedIdentifierRejected => "Refused Identifier Rejected",
+            ConnectReturnCode::ServerUnavailable => "Server Unavailable",
+            ConnectReturnCode::BadUsernamePassword => "Bad Username or Password",
+            ConnectReturnCode::NotAuthorized => "Not Authorized"
+        };
+        let first_space = str.find(' ').unwrap_or(str.len());
+        let (str, _) = str.split_at(first_space);
+        f.write_str(&str)
+    }
 }
 
 impl ConnectReturnCode {
@@ -226,7 +243,7 @@ impl ConnectReturnCode {
             3 => Ok(ConnectReturnCode::ServerUnavailable),
             4 => Ok(ConnectReturnCode::BadUsernamePassword),
             5 => Ok(ConnectReturnCode::NotAuthorized),
-            _ => Err(Error::UnsupportedConnectReturnCode)
+            _ => Err(MQError::UnsupportedConnectReturnCode)
         }
     }
 }
@@ -255,7 +272,7 @@ impl Header {
     pub fn new(hd: u8, len: usize) -> Result<Header> {
         Ok(Header {
             hd: hd,
-            typ: try!(PacketType::from_hd(hd)),
+            typ: (PacketType::from_hd(hd))?,
             len: len
         })
     }
